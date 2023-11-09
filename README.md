@@ -23,8 +23,7 @@ Before you begin, ensure you have the following installed:
 
 1. Clone the repository:
 ```bash
-git clone https://your-repository-url
-cd your-repository-directory
+git clone https://github.com/NamePending99/SvelteKit-OpenAI-Implementation.git
 ```
 
 2. Install npm:
