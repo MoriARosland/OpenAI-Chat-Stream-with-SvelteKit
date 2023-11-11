@@ -1,4 +1,4 @@
-import type { RequestEvent, RequestHandler } from './$types';
+import type { RequestHandler } from './$types';
 import { OPENAI_API_KEY } from '$env/static/private';
 import { OpenAI } from 'openai';
 import { error, json } from '@sveltejs/kit';
@@ -6,12 +6,16 @@ import { error, json } from '@sveltejs/kit';
 
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
-export const GET: RequestHandler = async (e: RequestEvent) => {
+export const POST: RequestHandler = async ({ request }) => {
 
-    let user = { admin: true };
+    let requestData;
 
-    if (!user.admin) {
-        throw error(401, 'Unauthorized');
+    try {
+        requestData = await request.json();
+
+    } catch (err) {
+        console.error('Error parsing request body:', err);
+        throw error(400, 'Invalid JSON in request body.');
     }
 
     try {
@@ -20,9 +24,9 @@ export const GET: RequestHandler = async (e: RequestEvent) => {
             model: "gpt-3.5-turbo",
         });
 
-        return json(response.choices[0].message.content);
+        return json(response.choices[0].message);
 
     } catch (err) {
-        throw error(500, 'Failed to fetch Data.');
+        throw error(500, 'Failed to fetch data.');
     }
 };
