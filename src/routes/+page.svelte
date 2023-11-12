@@ -8,6 +8,7 @@
 
 	const handleSubmit = async () => {
 		loading = true;
+		console.log('Handling submit...');
 
 		const response = await fetch('/api/chat', {
 			method: 'POST',
@@ -30,6 +31,7 @@
 		console.log(content);
 
 		loading = false;
+		console.log('Submit finished');
 	};
 </script>
 
@@ -39,7 +41,16 @@
 	<form class="flex flex-col w-[520px] shrink" on:submit|preventDefault={handleSubmit}>
 		<label class="pb-2" for="userInput">Write your text here:</label>
 		<textarea class="h-48 resize-none rounded-md" name="userInput" bind:value={inputText} />
-		<button class="btn btn-primary mt-4">proompt</button>
+
+		{#if !loading}
+			<button class="btn btn-primary mt-4">proompt</button>
+		{/if}
+
+		{#if loading}
+			<button class="btn btn-primary mt-4" disabled
+				>GENERATING <span class="spinner">⚡</span></button
+			>
+		{/if}
 		<div class="mt-4">
 			<h2>Answer:</h2>
 			{#if answer}
@@ -49,17 +60,4 @@
 	</form>
 </div>
 
-<!-- <div class="flex justify-center items-center min-h-screen">
-	<form
-		class="flex flex-col items-center w-full max-w-7xl"
-		on:submit|preventDefault={() => handleSubmit()}
-	>
-		<label class="w-max" for="context">Test</label>
-		<textarea class="w-5/12" name="context" rows="5" />
-		<button class="btn btn-primary mt-4">proompt</button>
-		<div class="">
-			<h2>Answer:</h2>
-			<p>GPT Answer</p>
-		</div>
-	</form>
-</div> -->
+<button class="btn" disabled>test</button>
