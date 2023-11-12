@@ -1,6 +1,4 @@
 <script>
-	import { error } from '@sveltejs/kit';
-
 	let loading = false;
 	let inputText = 'placeholder';
 
@@ -8,7 +6,6 @@
 
 	const handleSubmit = async () => {
 		loading = true;
-		console.log('Handling submit...');
 
 		const response = await fetch('/api/chat', {
 			method: 'POST',
@@ -31,7 +28,6 @@
 		console.log(content);
 
 		loading = false;
-		console.log('Submit finished');
 	};
 </script>
 
@@ -59,5 +55,3 @@
 		</div>
 	</form>
 </div>
-
-<button class="btn" disabled>test</button>
