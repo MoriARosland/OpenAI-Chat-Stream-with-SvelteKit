@@ -30,17 +30,22 @@ export const POST: RequestHandler = async ({ request }) => {
             stream: true
         });
 
-        for await (const chunk of completionResponse) {
-            if (chunk.choices[0].finish_reason === 'stop') {
-                console.log('[END OF STREAM]');
-                break
-            }
-            console.log(chunk);
-        }
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        };
 
-        return new Response(JSON.stringify({ completionResponse }), {
-            headers: { 'Content-Type': 'text/event-stream' }
-        })
+        const stream = new ReadableStream({
+            async start(controller) {
+                for await (const chunk of completionResponse) {
+                    controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
+                }
+                controller.close();
+            }
+        });
+
+        return new Response(stream, { headers });
 
     } catch (err) {
         throw error(500, 'Failed to fetch data.');
