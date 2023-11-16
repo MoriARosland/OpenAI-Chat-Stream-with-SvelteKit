@@ -1,33 +1,56 @@
-<script>
+<script lang="ts">
+	import { SSE } from 'sse.js';
+
 	let loading = false;
-	let inputText = 'placeholder';
+	let error = false;
+
+	let inputText = 'one';
 
 	let answer = '';
 
 	const handleSubmit = async () => {
 		loading = true;
+		error = false;
 
-		const response = await fetch('/api/chat', {
-			method: 'POST',
+		answer = '';
+
+		const eventSource = new SSE('/api/chat', {
 			headers: {
 				'Content-Type': 'application/json'
 			},
-			body: JSON.stringify({ inputText })
+			payload: JSON.stringify({ inputText })
 		});
 
-		if (!response.ok) {
-			console.log('Unexpected error');
-			throw new Error('An error occured');
-		}
+		inputText = '';
 
-		const responseData = await response.json();
+		eventSource.addEventListener('error', (e) => {
+			console.log('error', e);
+			error = true;
+			loading = false;
 
-		const { content } = responseData;
-		answer = content;
+			alert('An error occured');
+		});
 
-		console.log(content);
+		eventSource.addEventListener('message', (e) => {
+			try {
+				loading = false;
+				const data = JSON.parse(e.data);
 
-		loading = false;
+				if (data.choices[0].finish_reason === 'stop') {
+					// End of Stream
+					return;
+				}
+
+				const { content } = data.choices[0].delta;
+				answer = (answer ?? '') + content;
+			} catch (err) {
+				error = true;
+				loading = false;
+
+				console.error(err);
+				alert('Failed to read message');
+			}
+		});
 	};
 </script>
 

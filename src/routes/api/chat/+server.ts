@@ -24,12 +24,28 @@ export const POST: RequestHandler = async ({ request }) => {
         // const messageArray = [{ role: "system", content: "You are a helpful assistant." }];
         // messageArray.push({ role: "user", content: inputText });
 
-        const response = await openai.chat.completions.create({
+        const completionResponse = await openai.chat.completions.create({
             messages: [{ role: "system", content: "You are a helpful assistant." }, { role: "user", content: inputText }],
             model: "gpt-3.5-turbo",
+            stream: true
         });
 
-        return json(response.choices[0].message);
+        const headers = {
+            'Content-Type': 'text/event-stream',
+            'Cache-Control': 'no-cache',
+            'Connection': 'keep-alive',
+        };
+
+        const stream = new ReadableStream({
+            async start(controller) {
+                for await (const chunk of completionResponse) {
+                    controller.enqueue(`data: ${JSON.stringify(chunk)}\n\n`);
+                }
+                controller.close();
+            }
+        });
+
+        return new Response(stream, { headers });
 
     } catch (err) {
         throw error(500, 'Failed to fetch data.');
